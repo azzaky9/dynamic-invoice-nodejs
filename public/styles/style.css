@@ -1,0 +1,219 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 10px 5px;
+}
+
+.image-container {
+  max-width: 100%;
+  height: auto; /* This ensures that the container height adjusts according to the image's aspect ratio */
+  text-align: center; /* Optional: Center the image horizontally */
+}
+
+.responsive-image {
+  max-width: 100%; /* Ensures the image doesn't exceed its container width */
+  height: 120px; /* Set your desired height here */
+}
+
+.container {
+  width: 800px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+}
+
+.text-normal {
+  font-weight: 400 !important;
+  font-size: 0.8rem;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 200px 75%;
+  align-items: center;
+}
+
+.logo {
+  width: 100px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.full {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.letter_block h3 {
+  width: fit-content;
+  border: 1px solid blue;
+  color: blue;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  padding: 3px 24px;
+  margin-bottom: 5px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.letter_block span {
+  padding-left: 24px;
+  padding-top: 3rem;
+  font-weight: 800;
+}
+
+.company_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.company_name {
+  font-family: "Times New Roman", Times, serif;
+  color: red;
+  font-weight: bolder;
+  font-size: 2rem;
+}
+
+.company_address {
+  color: rgb(52, 52, 255);
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.company_state {
+  color: rgb(52, 52, 255);
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.company_description {
+  color: rgb(52, 52, 255);
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: bold;
+  text-align: center;
+}
+
+.shipping {
+  width: 100%;
+  justify-content: space-between;
+  display: flex;
+  margin-top: 10px;
+  margin: 0 15px;
+}
+
+.shipping_person {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.shipping_person h3 {
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.shipping_text_container {
+  display: grid;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.size_md {
+  grid-template-columns: 59px auto;
+}
+
+.size_lg {
+  grid-template-columns: 145px auto;
+}
+
+.payment {
+  display: grid;
+  grid-template-columns: 80px auto;
+  font-weight: bold;
+}
+.payment_list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.detail-barang {
+  margin: 5px 10px;
+  margin-top: 5px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.tagihan {
+  margin-top: 20px;
+}
+
+.catatan {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.footer {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  padding: 2px 15px;
+  gap: 10px;
+}
+
+.notes p {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.list_container {
+  padding-left: 10px;
+}
+.list_container li {
+  font-size: 0.5rem;
+}
+.handwriting_container {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.hendwrite {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: space-between;
+}
+
+.hendwrite {
+  margin-top: 5px;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <link
+      rel="stylesheet"
+      href="/styles/style.css"
+    />
+    <title>Struk Pengiriman Barang</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="image-container">
+          <img
+            src="http://localhost:8080/images/pumex-mdn.png"
+            alt="Your Image"
+            class="responsive-image"
+          />
+        </div>
+        <div class="company_container">
+          <h2 class="company_name">CV. PUTRA MANDIRI EXPRESS</h2>
+          <p class="company_address"
+            >JL CEMARA No.98/214 TELP. (061) 6610845, FAX. (061) 6614903</p
+          >
+          <p class="company_state">MEDAN-20239</p>
+          <p class="company_description">
+            Menerima Pengiriman Barang Melalui Darat, Udara dan Laut <br />
+            kesuluruhan daerah di indonesia
+          </p>
+        </div>
+      </div>
+      <div class="full">
+        <div class="letter_block">
+          <h3>Surat Tanda Terima Kiriman</h3>
+          <span>No: {{invoiceNumber}}</span>
+        </div>
+      </div>
+      <div class="shipping">
+        <div class="shipping_person">
+          <h3>Pengirim</h3>
+          <div class="shipping_text_container size_md">
+            <p>Nama </p>
+            <p class="text-normal">: {{sender.name}} </p>
+          </div>
+          <div class="shipping_text_container size_md">
+            <p>Alamat </p>
+            <p class="text-normal">: {{sender.address}}</p>
+          </div>
+        </div>
+        <div class="shipping_person">
+          <h3>Penerima</h3>
+          <div class="shipping_text_container size_md">
+            <p>Nama </p>
+            <p class="text-normal">: {{recipient.name}}</p>
+          </div>
+          <div class="shipping_text_container size_md">
+            <p>Alamat </p>
+            <p class="text-normal">: {{recipient.address}}</p>
+          </div>
+        </div>
+      </div>
+      <div class="detail-barang">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Jenis / Nama Barang</th>
+              <th>Packing</th>
+              <th>Jumlah Colly</th>
+              <th>Berat / Kubik</th>
+              <th>Keterangan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Add rows of data here -->
+            <tr>
+              <td>1</td>
+              <td>Product A</td>
+              <td>Box</td>
+              <td>10</td>
+              <td>100 kg</td>
+              <td>Fragile</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Product B</td>
+              <td>Carton</td>
+              <td>20</td>
+              <td>150 kg</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Product C</td>
+              <td>Bag</td>
+              <td>15</td>
+              <td>80 kg</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td
+                rowspan="2"
+                colspan="2"
+              >
+                <div class="payment">
+                  <p class="payment_text">TAGIHAN</p>
+                  <div class="payment_list">
+                    <label for="">
+                      <input
+                        checked
+                        type="checkbox"
+                        name=""
+                        id=""
+                      />
+                      DP
+                    </label>
+                    <label for="">
+                      <input
+                        type="checkbox"
+                        name=""
+                        id=""
+                      />
+                      BB
+                    </label>
+                    <label for="">
+                      <input
+                        type="checkbox"
+                        name=""
+                        id=""
+                      />
+                      Lunas
+                    </label>
+                    <label for="">
+                      <input
+                        type="checkbox"
+                        name=""
+                        id=""
+                      />
+                      Bayar Lunas
+                    </label>
+                  </div>
+                </div>
+              </td>
+              <td
+                colspan="4"
+                rowspan="2"
+              >
+                <div class="table_amount_container">
+                  <div class="shipping_text_container size_lg">
+                    <p>JUMLAH TAGIHAN </p>
+                    <p>: Rp....</p>
+                  </div>
+                  <div class="shipping_text_container size_lg">
+                    <p>TERBILANG </p>
+                    <p>:....</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Add more rows as needed -->
+          </tbody>
+        </table>
+      </div>
+      <div class="footer ">
+        <div class="notes">
+          <p>CATATAN</p>
+          <ol
+            type="1"
+            class="list_container"
+          >
+            {{#notes}}
+            <li>{{note}}</li>
+            {{/notes}}
+          </ol>
+        </div>
+        <div class="handwriting_container">
+          <div class="hendwrite">
+            <p
+              >Cap/Tanda Tangan <br />
+              Penerima</p
+            >
+            <span>(............................)</span>
+          </div>
+          <div>
+            <div class="hendwrite">
+              <p
+                >Cap/Tanda Tangan <br />
+                Penerima</p
+              >
+              <span>(............................)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
