@@ -6,25 +6,32 @@ import fs from "fs";
 import mustache from "mustache";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
+import dotenv from "dotenv";
+import { prismaConnection } from "./src/lib/prisma.js";
+import { randomUUID } from "crypto";
+import util from "util";
+import { nestedLog } from "./src/helper/nested-log.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Create an instance of express
 
 const app = express();
 
 app.use(cors());
-// app.use(e.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 app.use(express.static(path.resolve(__dirname, "public")));
 
-var data = {
-  pengirim: {
-    nama: "Budi Santoso",
-    alamat: "Jl. Merdeka No. 123, Medan"
+dotenv.config();
+
+const data = {
+  sender: {
+    name: "",
+    address: ""
   },
-  penerima: {
-    nama: "Andi Wijaya",
-    alamat: "Jl. Sudirman No. 456, Jakarta"
+  recipient: {
+    name: "",
+    address: ""
   },
   barang: [
     {
@@ -43,14 +50,6 @@ var data = {
     lunas: "Rp. 500.000",
     dp: "Rp. 200.000",
     jumlah_tagihan: "Rp. 300.000"
-  },
-  sender: {
-    name: "Joni",
-    address: "Example address sender"
-  },
-  recipient: {
-    name: "Joko",
-    address: "Example address recipient Jl Melati "
   },
   catatan:
     "Barang harap diperiksa sebelum diterima.\nJika ada kerusakan, segera hubungi pengirim.",
@@ -76,13 +75,82 @@ var data = {
   ]
 };
 // Define a route handler for the root path
-app.get("/", async (req, res) => {
+app.post("/doc", async (req, res) => {
+  const body = req.body;
+
+  console.log(body);
+
+  if (!body.orderId) {
+    return res.send({ message: "need orderId for creating the invoice" });
+  }
+
+  // Required: {orderId -> String}
+  const totalInvoice = await prismaConnection.invoice.count();
+  await prismaConnection.invoice.create({
+    data: {
+      id: randomUUID(),
+      invoice_number: String(totalInvoice + 1).padStart("4", "000"),
+      order: {
+        connect: {
+          id: body.orderId
+        }
+      }
+    }
+  });
+
+  res.send({ message: "invoice created" }).redirect("/doc");
+});
+
+app.get("/doc", async (req, res) => {
+  // expected doc?d={invoiceId}
+
+  const params = req.query;
+  const id = params.d;
+
+  const rawInvoiceData = await prismaConnection.invoice.findFirst({
+    where: {
+      id
+    },
+    include: {
+      order: {
+        select: {
+          recipient_name: true,
+          address: true,
+          recipient_phone: true,
+          order_person: {
+            select: {
+              customer: {
+                select: {
+                  name: true,
+                  address: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  nestedLog(rawInvoiceData);
+
   const template = fs.readFileSync(
     path.join(__dirname, "public", "templates/A5-Surat-Jalan.html"),
     "utf-8"
   );
 
-  const renderedHtml = mustache.render(template, data);
+  const renderedHtml = mustache.render(template, {
+    ...data,
+    invoiceNumber: rawInvoiceData.invoice_number,
+    sender: {
+      name: rawInvoiceData.order[0].order_person[0].customer.name,
+      address: rawInvoiceData.order[0].order_person[0].customer.address
+    },
+    recipient: {
+      name: rawInvoiceData.order[0].recipient_name,
+      address: rawInvoiceData.order[0].address
+    }
+  });
   const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
   const page = await browser.newPage();
   await page.goto(`data:text/html,${renderedHtml}`, {
@@ -93,7 +161,7 @@ app.get("/", async (req, res) => {
     path: path.join(__dirname, "public", "styles/style.css")
   });
 
-  const pdfBuffer = await page.pdf({
+  const pdf = await page.pdf({
     path: "output.pdf",
     format: "A5",
     landscape: true
@@ -101,8 +169,12 @@ app.get("/", async (req, res) => {
 
   await browser.close();
 
-  res.contentType("application/pdf");
-  res.send(pdfBuffer);
+  res.type("application/pdf");
+  res.send(pdf);
+});
+
+app.get("/", async (req, res) => {
+  res.send({ message: "No ones here." });
 });
 
 // Set up the server to listen on port 8080
