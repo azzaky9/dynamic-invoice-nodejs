@@ -9,8 +9,9 @@ import path, { dirname } from "path";
 import dotenv from "dotenv";
 import { prismaConnection } from "./src/lib/prisma.js";
 import { randomUUID } from "crypto";
-import util from "util";
 import { nestedLog } from "./src/helper/nested-log.js";
+import { data } from "./src/utils/makeData.js";
+import { createArrayOfProduct } from "./src/service/docService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,56 +25,6 @@ app.use(express.static(path.resolve(__dirname, "public")));
 
 dotenv.config();
 
-const data = {
-  sender: {
-    name: "",
-    address: ""
-  },
-  recipient: {
-    name: "",
-    address: ""
-  },
-  barang: [
-    {
-      no: 1,
-      jenis: "Elektronik",
-      nama_barang: "Laptop",
-      packing: "Kardus",
-      jumlah: 1,
-      berat_kubik: "2 kg/m3",
-      keterangan: "Baru"
-    }
-  ],
-  invoiceNumber: 509,
-  tagihan: {
-    tagihan: "Rp. 1.000.000",
-    lunas: "Rp. 500.000",
-    dp: "Rp. 200.000",
-    jumlah_tagihan: "Rp. 300.000"
-  },
-  catatan:
-    "Barang harap diperiksa sebelum diterima.\nJika ada kerusakan, segera hubungi pengirim.",
-  notes: [
-    {
-      note: "CV PUTRA MANDIRI EXPRESS tidak akan mengganti atas kerusakan barang barang yang di sebabkan kerusakan membungkus, kebocoran atau akibat kurang kuatnya ikstan pembungkus"
-    },
-    {
-      note: "CV PUTRA MANDIRI EXPRESS tidak akan menggantirugi yang di akibatkan keaadaaan force mayor seperti kebakaran mobil, tabrakan mobil, mobil jatuh, penjarahan dalam perjalanan dll."
-    },
-    {
-      note: "Status hukum dari barang yang dikirm sepenuhnya tanggung jawab pemilik barang dan isi barang tidak di periksa"
-    },
-    {
-      note: "Barang-barang yang dirikim isinya harus cocok dan sejenis dengan yang tertera di faktur"
-    },
-    {
-      note: "Claim barang dan kurang karena kelainan sopir harus disaksikan kami dalam tempo 1x12 jam setelah barang diterima, setelah 1x12  jam bukan tanggung jawab kami"
-    },
-    {
-      note: "Barang-barang kiriman yang tidak  diasuransikan apabila terjadi kehilangan atau kerusakan, hanya dapat pengganti maksimum 10x dari biaya pengiriman, maksimal senilai harga baran diambil mana yang lebih rendah"
-    }
-  ]
-};
 // Define a route handler for the root path
 app.post("/doc", async (req, res) => {
   const body = req.body;
@@ -86,19 +37,30 @@ app.post("/doc", async (req, res) => {
 
   // Required: {orderId -> String}
   const totalInvoice = await prismaConnection.invoice.count();
-  await prismaConnection.invoice.create({
+  const createdInvoice = await prismaConnection.invoice.create({
     data: {
       id: randomUUID(),
       invoice_number: String(totalInvoice + 1).padStart("4", "000"),
       order: {
+        
         connect: {
           id: body.orderId
         }
       }
+    },
+    select: {
+      id: true
     }
   });
 
-  res.send({ message: "invoice created" }).redirect("/doc");
+  if (!createdInvoice) {
+    return res.send({
+      status: 500,
+      message: "error during creating, internal server error."
+    });
+  }
+
+  res.send({ message: "invoice created", url: `/doc?d=${createdInvoice.id}` });
 });
 
 app.get("/doc", async (req, res) => {
@@ -106,6 +68,10 @@ app.get("/doc", async (req, res) => {
 
   const params = req.query;
   const id = params.d;
+
+  if (!id) {
+    return res.redirect("/");
+  }
 
   const rawInvoiceData = await prismaConnection.invoice.findFirst({
     where: {
@@ -126,7 +92,18 @@ app.get("/doc", async (req, res) => {
                 }
               }
             }
-          }
+          },
+          product_orders: {
+            select: {
+              products: {
+                select: {
+                  name: true,
+                  description: true
+                }
+              }
+            }
+          },
+          total_price: true
         }
       }
     }
@@ -138,7 +115,11 @@ app.get("/doc", async (req, res) => {
     path.join(__dirname, "public", "templates/A5-Surat-Jalan.html"),
     "utf-8"
   );
-
+  const formatCurrency = data.totalPrice.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR"
+  });
+  const trimLastZero = formatCurrency.replace(/,00$/, "");
   const renderedHtml = mustache.render(template, {
     ...data,
     invoiceNumber: rawInvoiceData.invoice_number,
@@ -149,7 +130,9 @@ app.get("/doc", async (req, res) => {
     recipient: {
       name: rawInvoiceData.order[0].recipient_name,
       address: rawInvoiceData.order[0].address
-    }
+    },
+    totalPrice: trimLastZero,
+    productOrders: createArrayOfProduct(rawInvoiceData.order[0].product_orders)
   });
   const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
   const page = await browser.newPage();
@@ -162,12 +145,14 @@ app.get("/doc", async (req, res) => {
   });
 
   const pdf = await page.pdf({
-    path: "output.pdf",
+    path: "./dist/output.pdf",
     format: "A5",
     landscape: true
   });
 
   await browser.close();
+
+  console.log("PDF Launch.");
 
   res.type("application/pdf");
   res.send(pdf);

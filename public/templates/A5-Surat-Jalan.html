@@ -68,40 +68,25 @@
         <table>
           <thead>
             <tr>
-              <th>No.</th>
-              <th>Jenis / Nama Barang</th>
+              <th class="thead_number">No.</th>
+              <th class="thead_product">Jenis / Nama Barang</th>
               <th>Packing</th>
-              <th>Jumlah Colly</th>
+              <th class="thead_colly">Jumlah Colly</th>
               <th>Berat / Kubik</th>
               <th>Keterangan</th>
             </tr>
           </thead>
           <tbody>
-            <!-- Add rows of data here -->
+            {{#productOrders}}
             <tr>
-              <td>1</td>
-              <td>Product A</td>
-              <td>Box</td>
-              <td>10</td>
-              <td>100 kg</td>
-              <td>Fragile</td>
+              <td>{{no}}</td>
+              <td>{{name}}</td>
+              <td>{{packingType}}</td>
+              <td>{{quantity}}</td>
+              <td>{{weight}}</td>
+              <td>{{description}}</td>
             </tr>
-            <tr>
-              <td>2</td>
-              <td>Product B</td>
-              <td>Carton</td>
-              <td>20</td>
-              <td>150 kg</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Product C</td>
-              <td>Bag</td>
-              <td>15</td>
-              <td>80 kg</td>
-              <td></td>
-            </tr>
+            {{/productOrders}}
             <tr>
               <td
                 rowspan="2"
@@ -114,39 +99,24 @@
                       style="text-transform: uppercase;"
                       for=""
                     >
-                      <input
-                        type="checkbox"
-                        name=""
-                        id=""
-                      />
-                      Lunas
+                      <input {{#payment.lunas}}checked{{/payment.lunas}}
+                      type="checkbox" name="" id="" /> Lunas
                     </label>
                     <label
                       style="text-transform: uppercase;"
                       for=""
                     >
                       <input
-                        type="checkbox"
-                        name=""
-                        id=""
-                      />
-                      Bayar Tujuan
+                      {{#payment.bayarTujuan}}checked{{/payment.bayarTujuan}}
+                      type="checkbox" name="" id="" /> Bayar Tujuan
                     </label>
                     <label for="">
-                      <input
-                        type="checkbox"
-                        name=""
-                        id=""
-                      />
-                      BB
+                      <input {{#payment.BB}}checked{{/payment.BB}}
+                      type="checkbox" name="" id="" /> BB
                     </label>
                     <label for="">
-                      <input
-                        type="checkbox"
-                        name=""
-                        id=""
-                      />
-                      DP
+                      <input {{#payment.DP}}checked{{/payment.DP}}
+                      type="checkbox" name="" id="" /> DP
                     </label>
                   </div>
                 </div>
@@ -158,11 +128,11 @@
                 <div class="table_amount_container">
                   <div class="shipping_text_container size_lg">
                     <p>JUMLAH TAGIHAN </p>
-                    <p>: Rp....</p>
+                    <p>: {{totalPrice}} </p>
                   </div>
                   <div class="shipping_text_container size_lg">
                     <p>TERBILANG </p>
-                    <p>:....</p>
+                    <p>: </p>
                   </div>
                 </div>
               </td>
@@ -195,7 +165,7 @@
           <div>
             <div class="hendwrite">
               <p
-                >Medan, 20 Mar 2024 <br />
+                >Medan, {{ currentDate }} <br />
                 Hormat Kami,
               </p>
               <span>(............................)</span>

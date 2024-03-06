@@ -34,7 +34,7 @@ h1 {
 
 .text-normal {
   font-weight: 400 !important;
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .header {
@@ -152,7 +152,7 @@ h1 {
 }
 .payment_list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 90px 190px;
 }
 
 .detail-barang {
@@ -169,6 +169,16 @@ th,
 td {
   border: 1px solid #ddd;
   padding: 5px;
+}
+
+.thead_number {
+  width: 5%;
+}
+.thead_colly {
+  width: 6%;
+}
+.thead_product {
+  width: 45%;
 }
 
 .tagihan {
