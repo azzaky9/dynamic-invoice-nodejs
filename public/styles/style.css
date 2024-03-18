@@ -6,6 +6,10 @@
   margin: 0;
 }
 
+:root {
+  --primary: blue;
+}
+
 body {
   font-family: sans-serif;
   margin: 0;
@@ -62,8 +66,8 @@ h1 {
 
 .letter_block h3 {
   width: fit-content;
-  border: 1px solid blue;
-  color: blue;
+  border: 1px solid var(--primary);
+  color: var(--primary);
   font-size: 0.9rem;
   margin-top: 10px;
   padding: 3px 24px;
@@ -93,19 +97,19 @@ h1 {
 }
 
 .company_address {
-  color: rgb(52, 52, 255);
+  color: var(--primary);
   font-size: 0.9rem;
   font-weight: bold;
 }
 
 .company_state {
-  color: rgb(52, 52, 255);
+  color: var(--primary);
   font-size: 0.9rem;
   font-weight: bold;
 }
 
 .company_description {
-  color: rgb(52, 52, 255);
+  color: var(--primary);
   font-size: 1.1rem;
   font-style: italic;
   font-weight: bold;
@@ -226,4 +230,176 @@ td {
 .hendwrite {
   margin-top: 5px;
   font-size: 0.9rem;
+}
+
+.flex-between {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.flex-between > div {
+  flex: 1;
+  color: var(--primary);
+}
+
+.italic {
+  font-style: italic;
+}
+
+.flex {
+  display: flex;
+  gap: 2;
+}
+
+.text-center {
+  text-align: center;
+}
+
+hr {
+  color: #999; /* Line color */
+  background-color: #999; /* Line color for older browsers */
+  height: 2px; /* Line thickness */
+  border: none; /* Remove default border */
+}
+
+.input-container {
+  border-top: 1px solid var(--primary); /* Divider at the top */
+  border-bottom: 1px solid var(--primary); /* Divider at the bottom */
+  padding: 10px 0; /* Add some padding */
+  margin: 7px 10px;
+}
+
+.input-container-bottom {
+  width: 45%;
+  height: 120px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  border: 1px solid var(--primary); /* var(--primary) border on all sides */
+  border-radius: 5px; /* Border radius */
+  padding: 10px;
+  margin: 0 10px;
+}
+.input-container-bottom input {
+  width: 100%;
+  height: fit-content;
+}
+
+input {
+  border-radius: 5px;
+  padding: 8px;
+  border: 1px solid var(--primary); /* Thin var(--primary) border */
+}
+
+.input-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.input-row label {
+  flex: 1;
+  text-align: left;
+  margin-right: 5px; /* Decrease margin to bring label closer to input */
+}
+
+.footer-receipt {
+  display: flex;
+  justify-content: space-between;
+}
+.footer-receipt p {
+  margin-top: 10px;
+  margin-right: 20px;
+  color: var(--primary);
+}
+
+.input-row input {
+  flex: 4;
+  text-align: right;
+}
+
+.sum-input-container {
+  flex: 4;
+  text-align: right;
+}
+
+#input2 {
+  width: 103%;
+}
+
+.flex-col {
+  display: flex;
+  flex: 4;
+  gap: 10px;
+  margin-right: 20px;
+  flex-direction: column;
+}
+
+.roman {
+  font-family: "Times New Roman", Times, serif;
+}
+
+.text-main {
+  color: var(--primary);
+}
+
+#input3 {
+  height: 120px;
+}
+
+.grid-base {
+  display: grid;
+  grid-template-columns: 40px 10px 40px;
+}
+
+.headline {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.verical-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.receipt-info {
+  width: 100%;
+  background-color: #000000;
+  justify-self: flex-end;
+  align-items: center;
+}
+
+.tt_headline {
+  padding-left: 22px;
+  font-size: 1rem;
+  color: red;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+}
+
+.tt_address {
+  color: blue;
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 6px 0;
+  font-weight: bold;
+}
+
+.headline_container {
+  height: fit-content;
+  border-bottom: 2px solid blue;
+}
+
+.shrink-0 {
+  flex-shrink: 0;
+}
+
+.side-info {
+  display: inline-block;
+  width: 190px;
+  color: blue;
+  font-size: 0.8rem;
+  font-weight: bold;
 }

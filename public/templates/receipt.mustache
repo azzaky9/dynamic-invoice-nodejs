@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <link
+      rel="stylesheet"
+      href="/styles/style.css"
+    />
+    <title>Receipt</title>
+  </head>
+  <body>
+    <div class="flex-between">
+      <div>
+        <img
+          src="http://localhost:8080/images/pumex-mdn.png"
+          alt="Your Image"
+          class="responsive-image"
+        />
+      </div>
+      <div class="text-center">
+        <h3 class="headline">RECEIPT</h3>
+        <h3 class="italic text-base">Kwitansi</h3>
+      </div>
+
+      <div class="receipt-info">
+        <div class="grid-base">
+          <h5>No </h5>
+          <h5>:</h5>
+          <h5>{{}}</h5>
+        </div>
+        <div class="grid-base">
+          <h5>Date </h5>
+          <h5>:</h5>
+          <h5>{{}}</h5>
+        </div>
+      </div>
+    </div>
+    <div class="input-container">
+      <div class="input-row">
+        <label for="input1">
+          <h5 class="roman text-main">Received From</h5>
+          <h5 class="roman italic text-main">Sudah terima dari</h5>
+        </label>
+        <input
+          type="text"
+          id="input1"
+        />
+      </div>
+      <div class="input-row ">
+        <label for="input2">
+          <h5 class="roman text-main">The sum of </h5>
+          <h5 class="roman italic text-main">Banyaknya</h5>
+        </label>
+        <div class="flex-col">
+          <input
+            type="text"
+            id="input2"
+          />
+          <input
+            type="text"
+            id="input2"
+          />
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label for="input2">
+          <h5 class="roman text-main">Being payment For</h5>
+          <h5 class="roman italic text-main">untuk Pembayaran</h5>
+        </label>
+        <input
+          type="text"
+          id="input3"
+        />
+      </div>
+    </div>
+    <div class="footer-receipt">
+      <div class="input-container-bottom">
+        <label>
+          <h5 class="roman text-main">Amount</h5>
+          <h5 class="roman italic text-main">Jumlah</h5>
+        </label>
+        <input type="text" />
+      </div>
+      <p>.....................................................</p>
+    </div>
+  </body>
+</html>

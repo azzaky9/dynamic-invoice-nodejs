@@ -35,20 +35,19 @@ model invoice {
 model order {
   id              String           @id
   order_at        DateTime         @default(now())
-  payment_name    String?
-  total_price     BigInt
+  total_price     Int
   status          order_status
   address         String
   recipient_name  String
   recipient_phone String
   invoice_id      String?
+  payment_method  String?
+  packing_type    String?
   OrderActivity   OrderActivity[]
   invoice         invoice?         @relation(fields: [invoice_id], references: [id])
-  payment_method  payment_method?  @relation(fields: [payment_name], references: [payment])
   order_person    order_person[]
   product_orders  product_orders[]
 
-  @@index([payment_name], map: "order_payment_name_fkey")
   @@index([invoice_id], map: "order_invoice_id_fkey")
 }
 
@@ -64,11 +63,6 @@ model order_person {
   @@index([customer_id], map: "order_person_customer_id_fkey")
   @@index([order_id], map: "order_person_order_id_fkey")
   @@index([user_id], map: "order_person_user_id_fkey")
-}
-
-model payment_method {
-  payment String  @id @unique
-  order   order[]
 }
 
 model product_orders {
@@ -94,6 +88,7 @@ model products {
   updated_by     String
   created_by     String
   stock_id       Int?             @unique
+  weight         Int
   product_orders product_orders[]
   stocks         stocks?          @relation(fields: [stock_id], references: [id], onDelete: Cascade)
 }
@@ -115,6 +110,7 @@ model stocks {
   quantity       Int            @default(0)
   location_name  String
   is_pending     Boolean
+  quantity_type  String
   products       products?
   stock_status   stock_status?
   stock_location stock_location @relation(fields: [location_name], references: [name], onDelete: Cascade)
@@ -133,6 +129,12 @@ model users {
   role              users_role
   original_password String
   order_person      order_person[]
+}
+
+model Payment {
+  id         String   @id
+  name       String   @db.VarChar(100)
+  created_at DateTime @default(now())
 }
 
 enum stock_status_status {

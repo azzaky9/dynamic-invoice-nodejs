@@ -42,7 +42,6 @@ app.post("/doc", async (req, res) => {
       id: randomUUID(),
       invoice_number: String(totalInvoice + 1).padStart("4", "000"),
       order: {
-        
         connect: {
           id: body.orderId
         }
@@ -63,11 +62,44 @@ app.post("/doc", async (req, res) => {
   res.send({ message: "invoice created", url: `/doc?d=${createdInvoice.id}` });
 });
 
+app.get("/sample-doc", async (req, res) => {
+  console.log("trigger sample docs");
+
+  const template = fs.readFileSync(
+    path.join(__dirname, "public", "templates/tanda-terima.mustache"),
+    "utf-8"
+  );
+
+  const renderedHtml = mustache.render(template, {});
+
+  const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+  const page = await browser.newPage();
+  await page.goto(`data:text/html,${renderedHtml}`, {
+    waitUntil: "networkidle0"
+  });
+  // await page.setContent(renderedHtml, { waitUntil: "networkidle0" });
+  await page.addStyleTag({
+    path: path.join(__dirname, "public", "styles/style.css")
+  });
+
+  const pdf = await page.pdf({
+    path: "./dist/output.pdf",
+    format: "A5",
+    landscape: false
+  });
+
+  await browser.close();
+
+  res.type("application/pdf");
+  res.send(pdf);
+});
+
 app.get("/doc", async (req, res) => {
   // expected doc?d={invoiceId}
 
   const params = req.query;
   const id = params.d;
+  const qId = params.q_id;
 
   if (!id) {
     return res.redirect("/");
@@ -77,12 +109,19 @@ app.get("/doc", async (req, res) => {
     where: {
       id
     },
-    include: {
+    select: {
       order: {
         select: {
           recipient_name: true,
-          address: true,
           recipient_phone: true,
+          address: true,
+          payment_method: true,
+          packing_type: true,
+          invoice: {
+            select: {
+              invoice_number: true
+            }
+          },
           order_person: {
             select: {
               customer: {
@@ -98,7 +137,14 @@ app.get("/doc", async (req, res) => {
               products: {
                 select: {
                   name: true,
-                  description: true
+                  description: true,
+                  weight: true,
+                  price: true,
+                  stocks: {
+                    where: {
+                      id: Number(qId)
+                    }
+                  }
                 }
               }
             }
@@ -112,17 +158,21 @@ app.get("/doc", async (req, res) => {
   nestedLog(rawInvoiceData);
 
   const template = fs.readFileSync(
-    path.join(__dirname, "public", "templates/A5-Surat-Jalan.html"),
+    path.join(__dirname, "public", "templates/tanda-terima.html"),
     "utf-8"
   );
-  const formatCurrency = data.totalPrice.toLocaleString("id-ID", {
-    style: "currency",
-    currency: "IDR"
-  });
+
+  const formatCurrency = rawInvoiceData.order[0].total_price.toLocaleString(
+    "id-ID",
+    {
+      style: "currency",
+      currency: "IDR"
+    }
+  );
   const trimLastZero = formatCurrency.replace(/,00$/, "");
   const renderedHtml = mustache.render(template, {
     ...data,
-    invoiceNumber: rawInvoiceData.invoice_number,
+    invoiceNumber: rawInvoiceData.order[0].invoice.invoice_number,
     sender: {
       name: rawInvoiceData.order[0].order_person[0].customer.name,
       address: rawInvoiceData.order[0].order_person[0].customer.address
@@ -131,9 +181,16 @@ app.get("/doc", async (req, res) => {
       name: rawInvoiceData.order[0].recipient_name,
       address: rawInvoiceData.order[0].address
     },
+    payment: {
+      ...data.payment,
+      [rawInvoiceData.order[0].payment_method]: true
+    },
     totalPrice: trimLastZero,
-    productOrders: createArrayOfProduct(rawInvoiceData.order[0].product_orders)
+    productOrders: createArrayOfProduct(rawInvoiceData.order[0])
   });
+
+  nestedLog(renderedHtml);
+
   const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
   const page = await browser.newPage();
   await page.goto(`data:text/html,${renderedHtml}`, {
@@ -147,7 +204,7 @@ app.get("/doc", async (req, res) => {
   const pdf = await page.pdf({
     path: "./dist/output.pdf",
     format: "A5",
-    landscape: true
+    landscape: false
   });
 
   await browser.close();

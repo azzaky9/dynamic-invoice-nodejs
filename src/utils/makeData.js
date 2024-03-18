@@ -12,8 +12,8 @@ export const data = {
     address: ""
   },
   payment: {
-    lunas: false,
-    bayarTujuan: false,
+    LUNAS: false,
+    BAYAR_TUJUAN: false,
     BB: false,
     DP: false
   },
@@ -30,8 +30,8 @@ export const data = {
     }
   ],
   productOrders: [],
-  invoiceNumber: 509,
-  totalPrice: 3500000,
+  invoiceNumber: 0,
+  totalPrice: 0,
   catatan:
     "Barang harap diperiksa sebelum diterima.\nJika ada kerusakan, segera hubungi pengirim.",
   notes: [

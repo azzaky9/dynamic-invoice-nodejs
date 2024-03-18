@@ -1,14 +1,15 @@
 import { nestedLog } from "../helper/nested-log.js";
 
 export const createArrayOfProduct = (raws) => {
-  const result = raws.map((raw, index) => ({
+  nestedLog(raws);
+
+  const result = raws.product_orders.map((raw, index) => ({
     no: index + 1,
     name: raw.products.name,
     description: raw.products.description,
-    // change later
-    packingType: "Box",
-    quantity: 0,
-    weight: "100 kg"
+    packingType: raws.packing_type,
+    quantity: raw.products.stocks.quantity,
+    weight: raw.products.weight + " " + raw.products.stocks.quantity_type
   }));
 
   nestedLog(result);
