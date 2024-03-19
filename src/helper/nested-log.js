@@ -1,6 +1,6 @@
-import util from "util";
+const util = require("util");
 
-export function nestedLog(data) {
+module.exports = function nestedLog(data) {
   if (data instanceof Object) {
     console.log(util.inspect(data, false, null, true /* enable colors */));
 
@@ -8,4 +8,4 @@ export function nestedLog(data) {
   }
 
   console.log(data);
-}
+};

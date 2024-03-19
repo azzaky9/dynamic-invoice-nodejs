@@ -1,6 +1,6 @@
-import { nestedLog } from "../helper/nested-log.js";
+const { nestedLog } = require("../helper/nested-log");
 
-export const createArrayOfProduct = (raws) => {
+module.exports = createArrayOfProduct = (raws) => {
   nestedLog(raws);
 
   const result = raws.product_orders.map((raw, index) => ({

@@ -1,8 +1,8 @@
 // @example
 
-import { format } from "date-fns";
+const { format } = require("date-fns");
 
-export const data = {
+module.exports = data = {
   sender: {
     name: "",
     address: ""
