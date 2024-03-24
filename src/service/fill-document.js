@@ -4,174 +4,257 @@ const {
   patchDocument,
   PatchType,
   TextRun,
-  Packer
+  Packer,
+  Table,
+  TableRow,
+  TableCell,
+  VerticalAlign,
+  TextDirection,
+  HeadingLevel
 } = require("docx");
-const { fakerID_ID: faker } = require("@faker-js/faker");
-const { PDFNet } = require("@pdftron/pdfnet-node");
+const { faker } = require("@faker-js/faker");
 const path = require("path");
-const libre = require("libreoffice-convert");
-libre.convertAsync = require("util").promisify(libre.convert);
+const { create } = require("domain");
+const { generateKey } = require("crypto");
 // type exist = "RECEIPT" or "RECEIPT_PRODUCT"
 
-const outputPath = path.resolve(__dirname, "public", "output.pdf");
-
 function getStructure(type, data) {
-  if (type === "RECEIPT") {
-    const getRandomWeight = 9.219;
-    const getPrice = 2000;
+  const receiptProductStructure = {
+    noInvoice: 20,
+    date: new Date().toDateString(),
+    dueDate: new Date().toDateString(),
+    client_company: "test",
+    client_address: "test",
+    client_phon: "312931203891",
+    client_email: "jane@gmail.com",
+    company_name: "PT MEGA SEMESTA",
+    company_phone: "+62 81329391231",
+    admin: "theresia"
+  };
 
-    const receiptProductStructure = {
-      no: String(faker.finance.accountNumber()),
-      date: new Date().toDateString(),
-      receivedFrom: faker.person.fullName().toUpperCase(),
-      priceWords:
-        "Sembilan Juta Lima Ratus Tiga Puluh Dua Ribu Rupiah".toUpperCase(),
-      productName: faker.commerce.productName(),
-      fromCity: "MEDAN",
-      destination: faker.location.city().toUpperCase(),
-      weight: String(getRandomWeight),
-      stn: "kg",
-      resultWeight: String(getRandomWeight) + " " + "kg",
-      price: String(getPrice),
-      totalPrice: String(getRandomWeight * getPrice)
-    };
-
-    return receiptProductStructure;
-  }
+  return receiptProductStructure;
 }
 
-const convertToPDF = async (doc) => {
-  const pdfDoc = await PDFNet.PDFDoc.create();
-  await pdfDoc.initSecurityHandler();
-  await PDFNet.Convert.toPdf(pdfDoc, doc);
-  pdfDoc.save(outputPath, PDFNet.SDFDoc.SaveOptions.e_linearized);
+const generateData = () => {
+  return new Table({
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
+              new Paragraph({
+                text: `${faker.commerce.productName()} x ${faker.commerce.productName()} x ${faker.commerce.productName()}`,
+                size: "6pt"
+              })
+            ],
+            verticalAlign: VerticalAlign.CENTER
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: "Some Description" })],
+            verticalAlign: VerticalAlign.CENTER
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: String(faker.number.int(100)) })],
+            textDirection: VerticalAlign.CENTER
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: "Kg" })],
+            textDirection: VerticalAlign.CENTER
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: String(faker.number.int(1000)) })],
+            textDirection: VerticalAlign.CENTER
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: String(faker.number.int(10)) })],
+            textDirection: VerticalAlign.CENTER
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({
+                text: `PPN ${faker.number.int(20)}`,
+                size: "9pt"
+              })
+            ],
+            textDirection: VerticalAlign.CENTER
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({ text: String(faker.number.int(99999)) })
+            ],
+            textDirection: VerticalAlign.CENTER
+          })
+        ]
+      })
+    ]
+  });
 };
-
-async function fillDocument(data) {
-  const { docType = "RECEIPT" } = data;
-
-  const patches = {};
-  Object.entries(getStructure(docType)).forEach(([key, value]) => {
-    patches[key] = {
-      type: PatchType.PARAGRAPH,
+const generateText = (value) => {
+  return {
+    type: PatchType.PARAGRAPH,
+    children: [
+      new TextRun({
+        text: value,
+        bold: true
+      })
+    ]
+  };
+};
+const header = new Table({
+  rows: [
+    new TableRow({
       children: [
-        new TextRun({
-          text: value,
-          size: "9pt",
-          font: "Fira Code"
+        new TableCell({
+          children: [new Paragraph({ text: "Product" })],
+          verticalAlign: VerticalAlign.CENTER
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Deskripsi" })],
+          verticalAlign: VerticalAlign.CENTER
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Kuantitas" })],
+          textDirection: VerticalAlign.CENTER
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Satuan" })],
+          textDirection: VerticalAlign.CENTER
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Harga" })],
+          textDirection: VerticalAlign.CENTER
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Diskon" })],
+          textDirection: VerticalAlign.CENTER
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Pajak" })],
+          textDirection: VerticalAlign.CENTER
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Jumlah" })],
+          textDirection: VerticalAlign.CENTER
         })
       ]
-    };
-  });
+    })
+  ]
+});
 
-  return await patchDocument(
-    fs.readFileSync("./public/templates/receipt.docx"),
+async function fillDocument(data) {
+  const createDummy = [...Array(5)].map((a) => generateData());
+
+  patchDocument(
+    fs.readFileSync("./public/templates/invoice_ptmegasemesta.docx"),
     {
-      patches
+      patches: {
+        noInvoice: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "20"
+            })
+          ]
+        },
+        date: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: new Date().toDateString()
+            })
+          ]
+        },
+        dueDate: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: new Date().toDateString()
+            })
+          ]
+        },
+        client_company: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "SAMPLE COMPANY"
+            })
+          ]
+        },
+        client_address: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "SAMPLE ADDRESS"
+            })
+          ]
+        },
+        client_phone: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "+62 83912839128"
+            })
+          ]
+        },
+        client_email: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "SAMPLE EMAIL"
+            })
+          ]
+        },
+        company_name: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "PT MEGA SEMESTA"
+            })
+          ]
+        },
+        company_phone: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "+62 2349239492384"
+            })
+          ]
+        },
+        company_address: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "DASDAKLSBJDASDHASDAHDALSDKL"
+            })
+          ]
+        },
+        admin: {
+          type: PatchType.PARAGRAPH,
+          children: [
+            new TextRun({
+              text: "THERESIA"
+            })
+          ]
+        },
+        table: {
+          type: PatchType.DOCUMENT,
+          children: [header, ...createDummy]
+        },
+        subtotal: generateText(String(faker.number.int(999999))),
+        tax: generateText("11%"),
+        totalTax: generateText(String(faker.number.int(999999))),
+        total: generateText(String(faker.number.int(999999))),
+        rest: generateText(String(faker.number.int(999999)))
+      }
     }
   )
     .then((doc) => {
-      return doc;
+      if (doc) {
+        fs.writeFileSync("./public/templates/result.docx", doc);
+      }
     })
-    .catch((err) => {
-      console.log(err.message);
-    });
+    .catch((err) => console.log(err));
 }
-
-//  patches: {
-//       sender: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             ...DEFAULT_FONT_CONFIG,
-//             text: "Joe",
-//             size: "11pt"
-//           })
-//         ]
-//       },
-//       recipient: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             ...DEFAULT_FONT_CONFIG,
-//             text: "Joko",
-//             size: "11pt"
-//           })
-//         ]
-//       },
-//       qty: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "10",
-//             size: "10pt"
-//           })
-//         ]
-//       },
-//       stn: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "Kg",
-//             size: "10pt"
-//           })
-//         ]
-//       },
-//       weight: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "100",
-//             size: "10pt"
-//           })
-//         ]
-//       },
-//       name: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "Sample Product",
-//             size: "11pt"
-//           })
-//         ]
-//       },
-//       prd_desc: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "",
-//             size: "10pt"
-//           })
-//         ]
-//       },
-//       price: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "9.590.601.210,00",
-//             size: "8pt"
-//           })
-//         ]
-//       },
-//       price_words: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "Seratus Dua Puluh Ribu Rupiah",
-//             size: "10pt"
-//           })
-//         ]
-//       },
-//       description: {
-//         type: PatchType.PARAGRAPH,
-//         children: [
-//           new TextRun({
-//             text: "",
-//             size: "10pt"
-//           })
-//         ]
-//       }
-//     }
 
 module.exports = {
   fillDocument
