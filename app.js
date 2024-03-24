@@ -65,7 +65,7 @@ app.get("/sample-doc", async (req, res) => {
   console.log("trigger sample docs");
 
   const template = fs.readFileSync(
-    path.join(__dirname, "public", "templates/receipt.mustache"),
+    path.join(__dirname, "public", "templates", "receipt.mustache"),
     "utf-8"
   );
 

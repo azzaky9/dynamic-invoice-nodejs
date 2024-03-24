@@ -257,6 +257,10 @@ td {
   text-align: center;
 }
 
+.default-font-color {
+  color: black !important;
+}
+
 hr {
   color: #999; /* Line color */
   background-color: #999; /* Line color for older browsers */
@@ -278,17 +282,23 @@ hr {
   justify-content: space-between;
   gap: 15px;
   border: 1px solid var(--primary); /* var(--primary) border on all sides */
-  border-radius: 5px; /* Border radius */
+  border-radius: 10px; /* Border radius */
   padding: 10px;
-  margin: 0 10px;
+  margin: 5px 10px;
 }
+
+.disable-padding {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .input-container-bottom input {
   width: 100%;
   height: fit-content;
 }
 
 input {
-  border-radius: 5px;
+  border-radius: 10px;
   padding: 8px;
   border: 1px solid var(--primary); /* Thin var(--primary) border */
 }
@@ -317,7 +327,6 @@ input {
 
 .input-row input {
   flex: 4;
-  text-align: right;
 }
 
 .sum-input-container {
@@ -326,6 +335,7 @@ input {
 }
 
 #input2 {
+  height: 60px;
   width: 103%;
 }
 
@@ -341,19 +351,26 @@ input {
   font-family: "Times New Roman", Times, serif;
 }
 
+.arial {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.courier {
+  font-family: "Courier New", Courier, monospace;
+}
+
 .text-main {
   color: var(--primary);
 }
 
-#input3 {
-  height: 120px;
-}
-
 .grid-base {
   display: grid;
-  grid-template-columns: 40px 10px 40px;
+  grid-template-columns: 40px 10px 100%;
 }
 
+.font-normal {
+  font-weight: normal !important;
+}
 .headline {
   font-weight: bold;
   text-decoration: underline;
@@ -380,7 +397,7 @@ input {
 }
 
 .tt_address {
-  color: blue;
+  color: var(--primary);
   font-size: 0.8rem;
   text-align: center;
   margin: 6px 0;
@@ -389,7 +406,7 @@ input {
 
 .headline_container {
   height: fit-content;
-  border-bottom: 2px solid blue;
+  border-bottom: 2px solid var(--primary);
 }
 
 .shrink-0 {
@@ -399,7 +416,29 @@ input {
 .side-info {
   display: inline-block;
   width: 190px;
-  color: blue;
+  color: var(--primary);
   font-size: 0.8rem;
   font-weight: bold;
+}
+
+.sumof-textarea {
+  flex: 4;
+  padding: 10px;
+  border-radius: 10px;
+  border-color: var(--primary);
+}
+.bottom-price {
+  width: 100%;
+  padding: 10px;
+  border-color: var(--primary);
+  border-radius: 10px;
+  height: fit-content;
+}
+
+.h-custom {
+  height: 100px;
+}
+
+textarea {
+  resize: none;
 }
