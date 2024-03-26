@@ -49,14 +49,26 @@ app.get("/sample-doc", async (req, res) => {
 app.post("/invoice", async (req, res) => {
   const body = req.body;
 
-  await fillDocument(body);
+  const document = await fillDocument(body);
 
-  return res.redirect("/download-docx");
+  console.log("🚀 ~ app.post ~ document:", document);
+
+  if (document) {
+    return res
+      .status(200)
+      .send({ downloadedURL: `${process.env.DEV_URL}download-docx` });
+  }
+
+  return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
 });
 
 app.get("/download-docx", (req, res) => {
   const filePath = path.resolve("public", "templates/result.docx"); // Update with the actual path to your .docx file
-  res.sendFile(filePath);
+  if (filePath) {
+    return res.status(200).download(filePath);
+  }
+
+  return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
 });
 
 app.get("/", async (req, res) => {

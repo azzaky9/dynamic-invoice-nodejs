@@ -12,10 +12,10 @@ const {
   TextDirection,
   HeadingLevel
 } = require("docx");
+const moment = require("moment");
 const { faker } = require("@faker-js/faker");
 const path = require("path");
 const { create } = require("domain");
-const { generateKey } = require("crypto");
 // type exist = "RECEIPT" or "RECEIPT_PRODUCT"
 
 function getStructure(type, data) {
@@ -35,7 +35,22 @@ function getStructure(type, data) {
   return receiptProductStructure;
 }
 
-const generateData = () => {
+// TS
+
+/*
+  { 
+    name: string 
+    description: string 
+    quantity: string
+    stn: string 
+    price: string;
+    disc: string 
+    tax: string
+    totalAmount: string
+  }[]
+*/
+
+const generateData = (data) => {
   return new Table({
     rows: [
       new TableRow({
@@ -43,45 +58,43 @@ const generateData = () => {
           new TableCell({
             children: [
               new Paragraph({
-                text: `${faker.commerce.productName()} x ${faker.commerce.productName()} x ${faker.commerce.productName()}`,
+                text: data.name,
                 size: "6pt"
               })
             ],
             verticalAlign: VerticalAlign.CENTER
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Some Description" })],
+            children: [new Paragraph({ text: data.description })],
             verticalAlign: VerticalAlign.CENTER
           }),
           new TableCell({
-            children: [new Paragraph({ text: String(faker.number.int(100)) })],
+            children: [new Paragraph({ text: data.quantity })],
             textDirection: VerticalAlign.CENTER
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Kg" })],
+            children: [new Paragraph({ text: data.stn })],
             textDirection: VerticalAlign.CENTER
           }),
           new TableCell({
-            children: [new Paragraph({ text: String(faker.number.int(1000)) })],
+            children: [new Paragraph({ text: data.price })],
             textDirection: VerticalAlign.CENTER
           }),
           new TableCell({
-            children: [new Paragraph({ text: String(faker.number.int(10)) })],
+            children: [new Paragraph({ text: data.disc })],
             textDirection: VerticalAlign.CENTER
           }),
           new TableCell({
             children: [
               new Paragraph({
-                text: `PPN ${faker.number.int(20)}`,
+                text: data.tax,
                 size: "9pt"
               })
             ],
             textDirection: VerticalAlign.CENTER
           }),
           new TableCell({
-            children: [
-              new Paragraph({ text: String(faker.number.int(99999)) })
-            ],
+            children: [new Paragraph({ text: data.totalAmount })],
             textDirection: VerticalAlign.CENTER
           })
         ]
@@ -142,118 +155,130 @@ const header = new Table({
 });
 
 async function fillDocument(data) {
-  const createDummy = [...Array(5)].map((a) => generateData());
+  const { companyData, orderData, customerData, invoiceNumber, transaction } =
+    data;
+  const createDummy = orderData.map((a) => generateData());
 
-  patchDocument(
-    fs.readFileSync("./public/templates/invoice_ptmegasemesta.docx"),
-    {
-      patches: {
-        noInvoice: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "20"
-            })
-          ]
-        },
-        date: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: new Date().toDateString()
-            })
-          ]
-        },
-        dueDate: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: new Date().toDateString()
-            })
-          ]
-        },
-        client_company: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "SAMPLE COMPANY"
-            })
-          ]
-        },
-        client_address: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "SAMPLE ADDRESS"
-            })
-          ]
-        },
-        client_phone: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "+62 83912839128"
-            })
-          ]
-        },
-        client_email: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "SAMPLE EMAIL"
-            })
-          ]
-        },
-        company_name: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "PT MEGA SEMESTA"
-            })
-          ]
-        },
-        company_phone: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "+62 2349239492384"
-            })
-          ]
-        },
-        company_address: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "DASDAKLSBJDASDHASDAHDALSDKL"
-            })
-          ]
-        },
-        admin: {
-          type: PatchType.PARAGRAPH,
-          children: [
-            new TextRun({
-              text: "THERESIA"
-            })
-          ]
-        },
-        table: {
-          type: PatchType.DOCUMENT,
-          children: [header, ...createDummy]
-        },
-        subtotal: generateText(String(faker.number.int(999999))),
-        tax: generateText("11%"),
-        totalTax: generateText(String(faker.number.int(999999))),
-        total: generateText(String(faker.number.int(999999))),
-        rest: generateText(String(faker.number.int(999999)))
+  const momentNowObject = moment();
+  const now = momentNowObject.format("dd/MM/YYYY");
+  const dueDate = momentNowObject.add(15, "days").format("dd/MM/YYYY");
+
+  try {
+    const result = await patchDocument(
+      fs.readFileSync("./public/templates/invoice_ptmegasemesta.docx"),
+      {
+        patches: {
+          noInvoice: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: invoiceNumber
+              })
+            ]
+          },
+          date: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: now
+              })
+            ]
+          },
+          dueDate: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: dueDate
+              })
+            ]
+          },
+          client_company: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: customerData.name
+              })
+            ]
+          },
+          client_address: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: customerData.address
+              })
+            ]
+          },
+          client_phone: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: customerData.phone
+              })
+            ]
+          },
+          client_email: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: customerData.email
+              })
+            ]
+          },
+          company_name: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: companyData.name
+              })
+            ]
+          },
+          company_phone: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: companyData.phone
+              })
+            ]
+          },
+          company_address: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: companyData.address
+              })
+            ]
+          },
+          admin: {
+            type: PatchType.PARAGRAPH,
+            children: [
+              new TextRun({
+                text: companyData.admin
+              })
+            ]
+          },
+          table: {
+            type: PatchType.DOCUMENT,
+            children: [header, ...createDummy]
+          },
+          subtotal: generateText(transaction.subtotal),
+          tax: generateText(transaction.disc),
+          totalTax: generateText(transaction.totalTax),
+          total: generateText(transaction.totalAmount),
+          rest: generateText(transaction.rest)
+        }
       }
+    );
+
+    if (result) {
+      fs.writeFileSync("./public/templates/result.docx", result);
+
+      return result;
     }
-  )
-    .then((doc) => {
-      if (doc) {
-        fs.writeFileSync("./public/templates/result.docx", doc);
-      }
-    })
-    .catch((err) => console.log(err));
+  } catch (error) {
+    console.log(error.message);
+
+    throw new Error(error.message);
+  }
 }
 
 module.exports = {
