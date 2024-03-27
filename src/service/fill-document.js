@@ -171,7 +171,7 @@ const header = new Table({
   ]
 });
 
-async function fillDocument(data) {
+async function createInvoice(data) {
   const { companyData, orderData, customerData, invoiceNumber, transaction } =
     data;
 
@@ -356,8 +356,7 @@ async function createSuratJalan(data) {
   }
 }
 
-createSuratJalan();
-
 module.exports = {
-  fillDocument
+  createInvoice,
+  createSuratJalan
 };

@@ -4,7 +4,11 @@ const fs = require("fs");
 const mustache = require("mustache");
 const path = require("path");
 const dotenv = require("dotenv");
-const { fillDocument } = require("./src/service/fill-document.js");
+const {
+  fillDocument,
+  createInvoice,
+  createSuratJalan
+} = require("./src/service/fill-document.js");
 
 const app = express();
 
@@ -48,22 +52,42 @@ app.get("/sample-doc", async (req, res) => {
 
 app.post("/invoice", async (req, res) => {
   const body = req.body;
+  const q = req.query;
 
-  const document = await fillDocument(body);
+  if (q.dType === "invoice") {
+    const document = await createInvoice(body);
 
-  console.log("🚀 ~ app.post ~ document:", document);
-
-  if (document) {
-    return res
-      .status(200)
-      .send({ downloadedURL: `${process.env.DEV_URL}download-docx` });
+    if (document) {
+      return res.status(200).send({
+        downloadedURL: `${process.env.DEV_URL}download-docx?docType=${q.dType}`
+      });
+    }
   }
+
+  if (q.dType === "shipping") {
+    const document = await createSuratJalan(body);
+
+    if (document) {
+      return res.status(200).send({
+        downloadedURL: `${process.env.DEV_URL}download-docx?docType=${q.dType}`
+      });
+    }
+  }
+
+  // console.log("🚀 ~ app.post ~ document:", document);
 
   return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
 });
 
 app.get("/download-docx", (req, res) => {
-  const filePath = path.resolve("public", "templates/result.docx"); // Update with the actual path to your .docx file
+  const q = req.query;
+  const getPath = path.resolve(
+    "public",
+    q.docType === "invoice"
+      ? "templates/result.docx"
+      : "templates/surat-jalan-template.docx"
+  );
+  const filePath = getPath; // Update with the actual path to your .docx file
   if (filePath) {
     return res.status(200).download(filePath);
   }
