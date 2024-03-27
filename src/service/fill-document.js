@@ -9,46 +9,75 @@ const {
   TableRow,
   TableCell,
   VerticalAlign,
+  HorizontalPositionAlign,
   TextDirection,
-  HeadingLevel
+  HeadingLevel,
+  WidthType,
+  AlignmentType
 } = require("docx");
 const moment = require("moment");
-const { faker } = require("@faker-js/faker");
 const path = require("path");
-const { create } = require("domain");
+const { fakerID_ID: faker } = require("@faker-js/faker");
+const { numberToWords } = require("./numberToWords");
 // type exist = "RECEIPT" or "RECEIPT_PRODUCT"
 
-function getStructure(type, data) {
-  const receiptProductStructure = {
-    noInvoice: 20,
-    date: new Date().toDateString(),
-    dueDate: new Date().toDateString(),
-    client_company: "test",
-    client_address: "test",
-    client_phon: "312931203891",
-    client_email: "jane@gmail.com",
-    company_name: "PT MEGA SEMESTA",
-    company_phone: "+62 81329391231",
-    admin: "theresia"
-  };
+const generateBaseTextTable = (data, otherCellProp) => {
+  return new TableCell({
+    ...otherCellProp,
+    children: [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: data,
+            size: `${10}pt`
+          })
+        ]
+      })
+    ],
+    verticalAlign: VerticalAlign.CENTER
+  });
+};
 
-  return receiptProductStructure;
-}
+const generateRows = (data, type) => {
+  const createBaseLoop = [...Array(data.length)];
+  const defaultSize = 100 / data.length;
 
-// TS
+  const rowsChildren = createBaseLoop.map((a, i) => {
+    return new TableCell({
+      width: {
+        size: i === 0 ? 6000 : 2000,
+        type: WidthType.DXA
+      },
+      children: [
+        new Paragraph({
+          spacing: {
+            after: 0
+          },
+          children: [
+            new TextRun({
+              text: data[i].text,
+              size: `${10}pt`,
+              bold: !!type ? type === "bold" : false
+            })
+          ]
+        })
+      ]
+    });
+  });
 
-/*
-  { 
-    name: string 
-    description: string 
-    quantity: string
-    stn: string 
-    price: string;
-    disc: string 
-    tax: string
-    totalAmount: string
-  }[]
-*/
+  return new Table({
+    rows: [
+      new TableRow({
+        children: rowsChildren
+      })
+    ]
+  });
+};
+
+// console.dir(createHeader(["a", "b", "c", "d"], "bold"), {
+//   depth: null,
+//   colors: true
+// });
 
 const generateData = (data) => {
   return new Table({
@@ -56,59 +85,47 @@ const generateData = (data) => {
       new TableRow({
         children: [
           new TableCell({
+            width: {
+              size: 30,
+              type: WidthType.PERCENTAGE
+            },
             children: [
               new Paragraph({
-                text: data.name,
-                size: "6pt"
+                children: [
+                  new TextRun({
+                    text: data.name,
+                    size: `${10}pt`
+                  })
+                ]
               })
             ],
             verticalAlign: VerticalAlign.CENTER
           }),
-          new TableCell({
-            children: [new Paragraph({ text: data.description })],
-            verticalAlign: VerticalAlign.CENTER
-          }),
-          new TableCell({
-            children: [new Paragraph({ text: data.quantity })],
-            textDirection: VerticalAlign.CENTER
-          }),
-          new TableCell({
-            children: [new Paragraph({ text: data.stn })],
-            textDirection: VerticalAlign.CENTER
-          }),
-          new TableCell({
-            children: [new Paragraph({ text: data.price })],
-            textDirection: VerticalAlign.CENTER
-          }),
-          new TableCell({
-            children: [new Paragraph({ text: data.disc })],
-            textDirection: VerticalAlign.CENTER
-          }),
-          new TableCell({
-            children: [
-              new Paragraph({
-                text: data.tax,
-                size: "9pt"
-              })
-            ],
-            textDirection: VerticalAlign.CENTER
-          }),
-          new TableCell({
-            children: [new Paragraph({ text: data.totalAmount })],
-            textDirection: VerticalAlign.CENTER
+          generateBaseTextTable(data.description),
+          generateBaseTextTable(data.quantity),
+          generateBaseTextTable(data.stn),
+          generateBaseTextTable(data.price),
+          generateBaseTextTable(data.disc),
+          generateBaseTextTable(data.tax),
+          generateBaseTextTable(data.totalAmount, {
+            width: {
+              size: 26,
+              type: WidthType.PERCENTAGE
+            }
           })
         ]
       })
     ]
   });
 };
-const generateText = (value) => {
+const generateText = (value, bold, otherConfigText) => {
   return {
     type: PatchType.PARAGRAPH,
     children: [
       new TextRun({
         text: value,
-        bold: true
+        bold,
+        ...otherConfigText
       })
     ]
   };
@@ -157,11 +174,14 @@ const header = new Table({
 async function fillDocument(data) {
   const { companyData, orderData, customerData, invoiceNumber, transaction } =
     data;
-  const createDummy = orderData.map((a) => generateData());
+
+  console.dir(data, { colors: true, depth: null });
+
+  const createDummy = orderData.map((data) => generateData(data));
 
   const momentNowObject = moment();
-  const now = momentNowObject.format("dd/MM/YYYY");
-  const dueDate = momentNowObject.add(15, "days").format("dd/MM/YYYY");
+  const now = momentNowObject.format("DD/MM/YYYY");
+  const dueDate = momentNowObject.add(15, "days").format("DD/MM/YYYY");
 
   try {
     const result = await patchDocument(
@@ -260,11 +280,11 @@ async function fillDocument(data) {
             type: PatchType.DOCUMENT,
             children: [header, ...createDummy]
           },
-          subtotal: generateText(transaction.subtotal),
-          tax: generateText(transaction.disc),
-          totalTax: generateText(transaction.totalTax),
-          total: generateText(transaction.totalAmount),
-          rest: generateText(transaction.rest)
+          subtotal: generateText(transaction.subtotal, true),
+          tax: generateText(orderData.tax, true),
+          totalTax: generateText(transaction.totalTax, true),
+          total: generateText(transaction.total, true),
+          rest: generateText(transaction.rest, true)
         }
       }
     );
@@ -280,6 +300,63 @@ async function fillDocument(data) {
     throw new Error(error.message);
   }
 }
+
+async function createSuratJalan(data) {
+  try {
+    const templatePath = "./public/templates/surat-jalan-template.docx";
+    const now = moment().format("DD/MM/YYYY");
+
+    const dummy = [...Array(6)].map((f) =>
+      generateRows([
+        {
+          text: faker.commerce.productName()
+        },
+        { text: String(faker.number.int({ max: 10 })) },
+        { text: String(faker.commerce.price()) },
+        { text: String(faker.commerce.price()) }
+      ])
+    );
+    // const templateSize = [30, ...Array(3).map((_, i) => halfSize[i])];
+    const getFakerPrice = faker.commerce.price();
+    const result = await patchDocument(fs.readFileSync(templatePath), {
+      patches: {
+        clientName: generateText("Riki Stang Mio", false, { size: `${9}pt` }),
+        totalAmount: generateText(getFakerPrice),
+        priceWords: generateText(numberToWords(Number(getFakerPrice)), false, {
+          size: `${9}pt`
+        }),
+        date: generateText(now),
+        noInvoice: generateText(String(29)),
+        tujuan: generateText(faker.location.streetAddress()),
+        orders: {
+          type: PatchType.DOCUMENT,
+          children: [
+            generateRows(
+              [
+                { text: "Nama Barang", size: 6000 },
+                { text: "Jumlah Unit", size: 2000 },
+                { text: "Harga", size: 2000 },
+                { text: "Sub Total", size: 2000 }
+              ],
+              "bold"
+            ),
+            ...dummy
+          ]
+        }
+      }
+    });
+
+    if (result) {
+      fs.writeFileSync("./public/templates/result-surat-jalan.docx", result);
+
+      return result;
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+createSuratJalan();
 
 module.exports = {
   fillDocument
