@@ -9,6 +9,7 @@ const {
   createInvoice,
   createSuratJalan
 } = require("./src/service/fill-document.js");
+const { getDocument } = require("./src/service/docService.js");
 
 const app = express();
 
@@ -54,27 +55,18 @@ app.post("/invoice", async (req, res) => {
   const body = req.body;
   const q = req.query;
 
-  if (q.dType === "invoice") {
-    const document = await createInvoice(body);
-
-    if (document) {
+  if (!!q.dType) {
+    const getDocuments = await getDocument(q.dType, body);
+    if (getDocuments) {
       return res.status(200).send({
         downloadedURL: `${process.env.DEV_URL}download-docx?docType=${q.dType}`
       });
     }
+  } else {
+    return res.status(400).send({
+      message: "must be include document type"
+    });
   }
-
-  if (q.dType === "shipping") {
-    const document = await createSuratJalan(body);
-
-    if (document) {
-      return res.status(200).send({
-        downloadedURL: `${process.env.DEV_URL}download-docx?docType=${q.dType}`
-      });
-    }
-  }
-
-  // console.log("🚀 ~ app.post ~ document:", document);
 
   return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
 });
@@ -85,7 +77,7 @@ app.get("/download-docx", (req, res) => {
     "public",
     q.docType === "invoice"
       ? "templates/result.docx"
-      : "templates/surat-jalan-template.docx"
+      : "templates/result-surat-jalan.docx"
   );
   const filePath = getPath; // Update with the actual path to your .docx file
   if (filePath) {

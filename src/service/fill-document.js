@@ -306,42 +306,38 @@ async function createSuratJalan(data) {
     const templatePath = "./public/templates/surat-jalan-template.docx";
     const now = moment().format("DD/MM/YYYY");
 
-    const dummy = [...Array(6)].map((f) =>
+    const headerTable = generateRows(
+      [
+        { text: "Nama Barang", size: 6000 },
+        { text: "Jumlah Unit", size: 2000 },
+        { text: "Harga", size: 2000 },
+        { text: "Sub Total", size: 2000 }
+      ],
+      "bold"
+    );
+    const bodyTable = data.products.map((product) =>
       generateRows([
         {
-          text: faker.commerce.productName()
+          text: product.name
         },
-        { text: String(faker.number.int({ max: 10 })) },
-        { text: String(faker.commerce.price()) },
-        { text: String(faker.commerce.price()) }
+        { text: product.quantity },
+        { text: product.price },
+        { text: product.subTotal }
       ])
     );
-    // const templateSize = [30, ...Array(3).map((_, i) => halfSize[i])];
-    const getFakerPrice = faker.commerce.price();
     const result = await patchDocument(fs.readFileSync(templatePath), {
       patches: {
-        clientName: generateText("Riki Stang Mio", false, { size: `${9}pt` }),
-        totalAmount: generateText(getFakerPrice),
-        priceWords: generateText(numberToWords(Number(getFakerPrice)), false, {
+        clientName: generateText(data.clientName, false, { size: `${9}pt` }),
+        totalAmount: generateText(data.price),
+        priceWords: generateText(data.priceWords, false, {
           size: `${9}pt`
         }),
         date: generateText(now),
-        noInvoice: generateText(String(29)),
-        tujuan: generateText(faker.location.streetAddress()),
+        noInvoice: generateText(data.noInvoice),
+        tujuan: generateText(data.shippingTo),
         orders: {
           type: PatchType.DOCUMENT,
-          children: [
-            generateRows(
-              [
-                { text: "Nama Barang", size: 6000 },
-                { text: "Jumlah Unit", size: 2000 },
-                { text: "Harga", size: 2000 },
-                { text: "Sub Total", size: 2000 }
-              ],
-              "bold"
-            ),
-            ...dummy
-          ]
+          children: [headerTable, ...bodyTable]
         }
       }
     });

@@ -1,6 +1,7 @@
 const { nestedLog } = require("../helper/nested-log");
+const { createInvoice, createSuratJalan } = require("./fill-document");
 
-module.exports = createArrayOfProduct = (raws) => {
+const createArrayOfProduct = (raws) => {
   nestedLog(raws);
 
   const result = raws.product_orders.map((raw, index) => ({
@@ -15,4 +16,17 @@ module.exports = createArrayOfProduct = (raws) => {
   nestedLog(result);
 
   return result;
+};
+
+const getDocument = async (docType, bodyRequest) => {
+  return docType === "invoice"
+    ? createInvoice(bodyRequest)
+    : docType === "shipping"
+    ? createSuratJalan(bodyRequest)
+    : null;
+};
+
+module.exports = {
+  createArrayOfProduct,
+  getDocument
 };
