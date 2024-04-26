@@ -14,7 +14,7 @@ jobs:
         uses: pinkasey/cpanel-deploy-action@v1.2.0
         with:
           hostname: "https://ptmegagemilangsemesta.com"
-          repository_root: "/home/ptm41705/repositories/invoice-renderer"
+          repository_root: "/home2/ptm41705/repositories/invoice-renderer"
           branch: main
           cpanel_username: "ptm41705"
           cpanel_token: "${{ secrets.CPANEL_TOKEN }}"
