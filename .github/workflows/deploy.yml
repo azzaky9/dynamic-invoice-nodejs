@@ -1,0 +1,21 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to cPanel
+        id: deploy
+        uses: pinkasey/cpanel-deploy-action@v1.2.0
+        with:
+          hostname: "https://ptmegagemilangsemesta.com"
+          repository_root: "/home/ptm41705/repositories/invoice-renderer"
+          branch: main
+          cpanel_token: "${{ secrets.CPANEL_TOKEN }}"
+      - name: echo deploy-duration
+        run: echo "Deployment took ${{ steps.deploy.outputs.duration }} milliseconds"
