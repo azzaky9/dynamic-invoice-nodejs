@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Deploy to cPanel
         id: deploy
-        uses: pinkasey/cpanel-deploy-action@v1.2.0
+        uses: pinkasey/cpanel-deploy-action@v1.0.0
         with:
           hostname: "https://ptmegagemilangsemesta.com"
           repository_root: "/home2/ptm41705/repositories/invoice-renderer"
