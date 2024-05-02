@@ -4,12 +4,8 @@ const fs = require("fs");
 const mustache = require("mustache");
 const path = require("path");
 const dotenv = require("dotenv");
-const {
-  fillDocument,
-  createInvoice,
-  createSuratJalan
-} = require("./src/service/fill-document.js");
-const { getDocument } = require("./src/service/docService.js");
+const { requestDocument } = require("./src/controller/invoice-controller.js");
+const logger = require("./src/lib/logger.js");
 
 const app = express();
 
@@ -55,40 +51,67 @@ app.post("/invoice", async (req, res) => {
   const body = req.body;
   const q = req.query;
 
-  if (!!q.dType) {
-    const getDocuments = await getDocument(q.dType, body);
-    if (getDocuments) {
-      return res.status(200).send({
-        downloadedURL: `${process.env.DEV_URL}download-docx?docType=${q.dType}`
+  logger.info("Client Request the Invoice with query parameter: ", q);
+
+  try {
+    if (!!q.dType) {
+      logger.info("Document Type Valid, start to request.");
+      const getDocuments = await requestDocument(q.dType, body);
+      console.log("🚀 ~ app.post ~ getDocuments:", getDocuments);
+
+      if (getDocuments) {
+        logger.info("Document Created!. Server send download URL to Client..");
+        return res.status(200).send({
+          downloadedURL: `${process.env.DEV_URL}download-docx?docType=${q.dType}`
+        });
+      }
+    } else {
+      logger.info("Document type doesn't exist. Server send bad request.");
+      return res.status(400).send({
+        message: "must be include document type"
       });
     }
-  } else {
-    return res.status(400).send({
-      message: "must be include document type"
-    });
+  } catch (error) {
+    logger.error("Failed to create the document. Error happen in Server.");
+    console.log(error);
+    return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
   }
-
-  return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
 });
 
 app.get("/download-docx", (req, res) => {
   const q = req.query;
-  const getPath = path.resolve(
-    "public",
-    q.docType === "invoice"
-      ? "templates/result.docx"
-      : "templates/result-surat-jalan.docx"
-  );
-  const filePath = getPath; // Update with the actual path to your .docx file
-  if (filePath) {
-    return res.status(200).download(filePath);
-  }
 
-  return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
+  try {
+    logger.info("Client try to download the Document with query: ", q);
+
+    const getPath = path.resolve(
+      "public",
+      q.docType === "invoice"
+        ? "templates/result.docx"
+        : "templates/result-surat-jalan.docx"
+    );
+    const filePath = getPath; // Update with the actual path to your .docx file
+    if (filePath) {
+      logger.info("Path Valid. Download Start, Process done.");
+      return res.status(200).download(filePath);
+    }
+  } catch (error) {
+    logger.error(
+      "Error happen during requesting with URL, INTERNAL SERVER ERROR."
+    );
+    console.error(error.message);
+    return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+app.get("/error-url", async (req, res) => {
+  return res.send(`
+    <p style="text-align: center; padding: 40px; font-size: 16px">Error Request to the Server. Please make sure your request url is valid</p>
+  `);
 });
 
 app.get("/", async (req, res) => {
-  res.send({ message: "No ones here." });
+  return res.redirect(process.env.DIRECT_ORIGIN_URL);
 });
 
 // Set up the server to listen on port 8080
