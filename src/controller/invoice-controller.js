@@ -56,7 +56,6 @@ async function makeInvoice(data) {
       }
     }
   );
-  console.log("🚀 ~ makeInvoice ~ result:", result);
 
   if (result) {
     fs.writeFileSync("./public/templates/result.docx", result);

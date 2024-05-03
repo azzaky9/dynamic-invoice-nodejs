@@ -17,8 +17,6 @@ app.use(express.static(path.resolve(__dirname, "public")));
 dotenv.config();
 
 app.get("/sample-doc", async (req, res) => {
-  console.log("trigger sample docs");
-
   const template = fs.readFileSync(
     path.join(__dirname, "public", "templates", "receipt.mustache"),
     "utf-8"
@@ -57,12 +55,11 @@ app.post("/invoice", async (req, res) => {
     if (!!q.dType) {
       logger.info("Document Type Valid, start to request.");
       const getDocuments = await requestDocument(q.dType, body);
-      console.log("🚀 ~ app.post ~ getDocuments:", getDocuments);
 
       if (getDocuments) {
         logger.info("Document Created!. Server send download URL to Client..");
         return res.status(200).send({
-          downloadedURL: `${process.env.DEV_URL}download-docx?docType=${q.dType}`
+          downloadedURL: `${process.env.PUBLIC_URL}download-docx?docType=${q.dType}`
         });
       }
     } else {
@@ -116,6 +113,10 @@ app.get("/", async (req, res) => {
 
 // Set up the server to listen on port 8080
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+app.listen(PORT, (err) => {
+  if (err) {
+    logger.error("Error start the server");
+    return console.log(err.message);
+  }
+  return logger.info(`Server is listening on port ${PORT}`);
 });

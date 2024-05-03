@@ -20,8 +20,6 @@ function patchesData(value) {
 }
 
 function getTotal(qty, price) {
-  console.log("🚀 ~ getTotal ~ price:", price);
-  console.log("🚀 ~ getTotal ~ qty:", qty);
   return isNaN(qty) ? String(Number(qty) * Number(price)) : "";
 }
 
@@ -39,7 +37,6 @@ function getAmount(subTotal, disc, tax) {
  */
 function formatPersonData(data) {
   const { customerData: cs, companyData: c } = data;
-  console.log("🚀 ~ formatPersonData ~ cs:", cs);
 
   return {
     cs_name: patchesData(convertToCapitalCase(cs.name)),
@@ -106,7 +103,7 @@ function formatInvoiceData(data, disc, tax) {
     .reverse()
     .reduce((acc, product) => ({ ...acc, ...product }), {});
 
-  console.log("🚀 ~ formatInvoiceData ~ total:", total);
+  "🚀 ~ formatInvoiceData ~ total:", total;
 
   return [flatten, subTotal, total];
 }
