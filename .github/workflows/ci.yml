@@ -19,4 +19,4 @@ jobs:
             git pull origin main
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            pnpm install && pnpm run start:prod && pm2 reload invoice-generator
+            pnpm install && pm2 reload invoice-generator
