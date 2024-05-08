@@ -70,7 +70,6 @@ app.post("/invoice", async (req, res) => {
     }
   } catch (error) {
     logger.error("Failed to create the document. Error happen in Server.");
-    console.log(error);
     return res.status(500).send({ message: "INTERNAL_SERVER_ERROR" });
   }
 });

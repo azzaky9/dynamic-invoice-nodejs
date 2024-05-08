@@ -6,6 +6,4 @@ module.exports = function nestedLog(data) {
 
     return;
   }
-
-  console.log(data);
 };

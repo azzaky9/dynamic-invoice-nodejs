@@ -103,8 +103,6 @@ function formatInvoiceData(data, disc, tax) {
     .reverse()
     .reduce((acc, product) => ({ ...acc, ...product }), {});
 
-  "🚀 ~ formatInvoiceData ~ total:", total;
-
   return [flatten, subTotal, total];
 }
 
