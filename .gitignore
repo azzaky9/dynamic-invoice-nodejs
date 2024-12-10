@@ -4,3 +4,5 @@
 *.pdf
 *.env
 logs
+
+!.env.example

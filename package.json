@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "dotenv -e NODE_ENV=developmet -- nodemon app.js",
-    "start:prod": "NODE_ENV=production node app.js"
+    "start:prod": "dotenv -e NODE_ENV=production node app.js"
   },
   "keywords": [],
   "author": "",
