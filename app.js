@@ -1,11 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
-const mustache = require("mustache");
 const path = require("path");
 const dotenv = require("dotenv");
-const { requestDocument } = require("./src/controller/invoice-controller.js");
 const logger = require("./src/lib/logger.js");
+const { requestDocument } = require("./src/controller/invoice-controller.js");
 
 const app = express();
 
@@ -15,35 +13,6 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, "public")));
 
 dotenv.config();
-
-app.get("/sample-doc", async (req, res) => {
-  const template = fs.readFileSync(
-    path.join(__dirname, "public", "templates", "receipt.mustache"),
-    "utf-8"
-  );
-
-  const renderedHtml = mustache.render(template, {});
-
-  const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
-  const page = await browser.newPage();
-  await page.goto(`data:text/html,${renderedHtml}`, {
-    waitUntil: "networkidle0"
-  });
-  // await page.setContent(renderedHtml, { waitUntil: "networkidle0" });
-  await page.addStyleTag({
-    path: path.join(__dirname, "public", "styles/style.css")
-  });
-
-  const pdf = await page.pdf({
-    format: "A5",
-    landscape: true
-  });
-
-  await browser.close();
-
-  res.type("application/pdf");
-  res.send(pdf);
-});
 
 app.post("/invoice", async (req, res) => {
   const body = req.body;
@@ -111,7 +80,7 @@ app.get("/", async (req, res) => {
 });
 
 // Set up the server to listen on port 8080
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, (err) => {
   if (err) {
     logger.error("Error start the server");

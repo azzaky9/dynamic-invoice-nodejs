@@ -1,4 +1,5 @@
 const fs = require("fs");
+const moment = require("moment");
 const { patchDocument } = require("docx");
 const { generateText } = require("../service/document-service");
 const {
@@ -19,11 +20,7 @@ async function makeSuratJalan(data) {
   console.dir(data, { depth: null, color: true });
 
   const date = new Date();
-  const readableDate = date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
+  const readableDate = date.toLocaleDateString("id-Id");
 
   const person = formatPersonDataSj({
     customerData: {
@@ -71,11 +68,7 @@ async function makeInvoice(data) {
     transaction.tax
   );
   const date = new Date();
-  const readableDate = date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
+  const readableDate = date.toLocaleDateString("id-Id");
 
   const result = await patchDocument(
     fs.readFileSync("./public/templates/dynamic-invoice.docx"),
